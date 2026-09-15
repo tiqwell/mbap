@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" width="100%" height="100%" style="background-color:#F8FAFC;font-family:'Segoe UI',Arial,sans-serif;">
+<defs>
+  <filter id="shadow" x="-5%" y="-10%" width="110%" height="125%">
+    <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.07" flood-color="#000000"/>
+  </filter>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0 1 L10 5 L0 9 Z" fill="#CBD5E1"/>
+  </marker>
+  <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0 1 L10 5 L0 9 Z" fill="#F59E0B"/>
+  </marker>
+</defs>
+
+<!-- Header -->
+<text x="50" y="42" font-size="18" font-weight="700" fill="#0F172A">Взаимодействие процессов верхнего уровня (SIPOC)</text>
+<line x1="50" y1="68" x2="1150" y2="68" stroke="#E2E8F0" stroke-width="2"/>
+
+<!-- Column headers -->
+<g font-size="13" font-weight="700" fill="#475569">
+  <text x="130" y="98" text-anchor="middle">S · Поставщики</text>
+  <text x="350" y="98" text-anchor="middle">I · Входы</text>
+  <text x="600" y="98" text-anchor="middle">P · Процессы</text>
+  <text x="850" y="98" text-anchor="middle">O · Выходы</text>
+  <text x="1070" y="98" text-anchor="middle">C · Потребители</text>
+</g>
+
+<!-- Base connectors -->
+<g stroke="#CBD5E1" stroke-width="2" fill="none" marker-end="url(#arrow)">
+  <path d="M210 160 H250"/><path d="M450 160 H490"/><path d="M710 160 H750"/><path d="M950 160 H990"/>
+  <path d="M210 300 H250"/><path d="M450 300 H490"/><path d="M710 300 H750"/><path d="M950 300 H990"/>
+  <path d="M210 440 H250"/><path d="M450 440 H490"/><path d="M710 440 H750"/><path d="M950 440 H990"/>
+</g>
+
+<!-- Row 1 -->
+<g transform="translate(50,130)">
+  <rect width="160" height="60" rx="6" fill="#FFF" stroke="#E2E8F0" filter="url(#shadow)"/>
+  <text x="80" y="25" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1E293B">Застройщики (ЛСР, ПИК)</text>
+  <text x="80" y="45" text-anchor="middle" font-size="11" fill="#64748B">Гидрометцентр</text>
+
+  <rect x="200" width="200" height="60" rx="6" fill="#FFF" stroke="#E2E8F0" filter="url(#shadow)"/>
+  <text x="300" y="25" text-anchor="middle" font-size="11" font-weight="700" fill="#1E293B">Планы строительных работ</text>
+  <text x="300" y="45" text-anchor="middle" font-size="11" fill="#64748B">Прогноз погоды</text>
+
+  <rect x="440" y="-10" width="220" height="80" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="550" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#1E40AF">03 · 4.1</text>
+  <text x="550" y="40" text-anchor="middle" font-size="12" font-weight="700" fill="#1E3A8A">Сквозное планирование</text>
+  <text x="550" y="57" text-anchor="middle" font-size="12" font-weight="700" fill="#1E3A8A">спроса и поставок (S&amp;OP)</text>
+
+  <rect x="700" width="200" height="60" rx="6" fill="#FFF" stroke="#E2E8F0" filter="url(#shadow)"/>
+  <text x="800" y="25" text-anchor="middle" font-size="11" font-weight="700" fill="#1E293B">Ограниченный план поставок</text>
+  <text x="800" y="45" text-anchor="middle" font-size="11" fill="#64748B">График производства</text>
+
+  <rect x="940" width="160" height="60" rx="6" fill="#FFF" stroke="#E2E8F0" filter="url(#shadow)"/>
+  <text x="1020" y="25" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1E293B">4 завода холдинга</text>
+  <text x="1020" y="45" text-anchor="middle" font-size="11" fill="#64748B">Служба снабжения</text>
+</g>
+
+<!-- Row 2 -->
+<g transform="translate(50,270)">
+  <rect width="160" height="60" rx="6" fill="#FFF" stroke="#E2E8F0" filter="url(#shadow)"/>
+  <text x="80" y="35" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1E293B">Застройщики (клиенты)</text>
+
+  <rect x="200" width="200" height="60" rx="6" fill="#FFF" stroke="#E2E8F0" filter="url(#shadow)"/>
+  <text x="300" y="25" text-anchor="middle" font-size="11" font-weight="700" fill="#1E293B">Запрос на отгрузку</text>
+  <text x="300" y="45" text-anchor="middle" font-size="11" fill="#64748B">Требуемая дата доставки</text>
+
+  <rect x="440" y="-10" width="220" height="80" rx="8" fill="#FEF2F2" stroke="#DC2626" stroke-width="2" filter="url(#shadow)"/>
+  <text x="550" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#991B1B">02 · 3.5.4</text>
+  <text x="550" y="40" text-anchor="middle" font-size="12" font-weight="700" fill="#7F1D1D">Приём заказов и подтверждение</text>
+  <text x="550" y="57" text-anchor="middle" font-size="12" font-weight="700" fill="#7F1D1D">возможности поставки (ATP)</text>
+
+  <rect x="700" width="200" height="60" rx="6" fill="#FFF" stroke="#E2E8F0" filter="url(#shadow)"/>
+  <text x="800" y="25" text-anchor="middle" font-size="11" font-weight="700" fill="#1E293B">Подтверждённый заказ</text>
+  <text x="800" y="45" text-anchor="middle" font-size="11" fill="#64748B">Резерв транспорта</text>
+
+  <rect x="940" width="160" height="60" rx="6" fill="#FFF" stroke="#E2E8F0" filter="url(#shadow)"/>
+  <text x="1020" y="25" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1E293B">Транспортное упр.</text>
+  <text x="1020" y="45" text-anchor="middle" font-size="11" fill="#64748B">Застройщик</text>
+</g>
+
+<!-- Row 3 -->
+<g transform="translate(50,410)">
+  <rect width="160" height="60" rx="6" fill="#FFF" stroke="#E2E8F0" filter="url(#shadow)"/>
+  <text x="80" y="25" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1E293B">Склад готовой прод.</text>
+  <text x="80" y="45" text-anchor="middle" font-size="11" fill="#64748B">Отдел продаж</text>
+
+  <rect x="200" width="200" height="60" rx="6" fill="#FFF" stroke="#E2E8F0" filter="url(#shadow)"/>
+  <text x="300" y="25" text-anchor="middle" font-size="11" font-weight="700" fill="#1E293B">Подтверждённый заказ</text>
+  <text x="300" y="45" text-anchor="middle" font-size="11" fill="#64748B">Готовая продукция (ЖБИ)</text>
+
+  <rect x="440" y="-10" width="220" height="80" rx="8" fill="#FEF2F2" stroke="#DC2626" stroke-width="2" filter="url(#shadow)"/>
+  <text x="550" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#991B1B">07 · 4.4.4</text>
+  <text x="550" y="40" text-anchor="middle" font-size="12" font-weight="700" fill="#7F1D1D">Транспортировка и доставка</text>
+  <text x="550" y="57" text-anchor="middle" font-size="12" font-weight="700" fill="#7F1D1D">продукции клиентам</text>
+
+  <rect x="700" width="200" height="60" rx="6" fill="#FFF" stroke="#E2E8F0" filter="url(#shadow)"/>
+  <text x="800" y="25" text-anchor="middle" font-size="11" font-weight="700" fill="#1E293B">Доставленная продукция</text>
+  <text x="800" y="45" text-anchor="middle" font-size="11" fill="#64748B">GPS-трекинг и уведомления</text>
+
+  <rect x="940" width="160" height="60" rx="6" fill="#FFF" stroke="#E2E8F0" filter="url(#shadow)"/>
+  <text x="1020" y="35" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1E293B">Застройщики (клиенты)</text>
+</g>
+
+<!-- Feedback loops: kept as visual relationships, labels removed -->
+<g fill="none" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrow-amber)">
+  <path d="M850 190 V225 H600 V260"/>
+  <path d="M850 470 V500 H1130 V300 H710"/>
+</g>
+
+</svg>
