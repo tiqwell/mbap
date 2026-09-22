@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" xmlns:color="http://www.omg.org/spec/BPMN/non-normative/color/1.0" id="Defs_StroyMat_DZ3" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.29.0">
+  <bpmn:collaboration id="Collab_StroyMat">
+    <bpmn:participant id="P_Client" name="Клиент-застройщик (ТПС, ПИК, ЛСР)" />
+    <bpmn:participant id="P_O2" name="О2 · Приём заказов" processRef="Proc_O2" />
+    <bpmn:participant id="P_O3" name="О3 · Планирование S&#38;OP" processRef="Proc_O3" />
+    <bpmn:participant id="P_O67" name="О6–О7 · Отгрузка и доставка" processRef="Proc_O67" />
+    <bpmn:participant id="P_Supp" name="Поставщики сырья (цемент, песок, щебень, арматура, добавки)" />
+    <bpmn:messageFlow id="M01" name="Заявка на отгрузку" sourceRef="P_Client" targetRef="S1" />
+    <bpmn:messageFlow id="M02" name="График отгрузки" sourceRef="T13" targetRef="P_Client" />
+    <bpmn:messageFlow id="M03" name="Подтверждение / корректировка" sourceRef="P_Client" targetRef="T14" />
+    <bpmn:messageFlow id="M04" name="Запрос ресурсов под заявку" sourceRef="T12" targetRef="T21" />
+    <bpmn:messageFlow id="M05" name="Срок по мощностям и сырью" sourceRef="T21" targetRef="T12" />
+    <bpmn:messageFlow id="M07" name="График отгрузок и потребность в транспорте" sourceRef="E2" targetRef="S3" />
+    <bpmn:messageFlow id="M13" name="Партия и документы на объекте" sourceRef="E4" targetRef="P_Client" />
+    <bpmn:messageFlow id="M10" name="План закупок" sourceRef="T23" targetRef="P_Supp" />
+    <bpmn:messageFlow id="M11" name="Подтверждение сырья" sourceRef="P_Supp" targetRef="T23" />
+  </bpmn:collaboration>
+  <bpmn:process id="Proc_O2" isExecutable="false">
+    <bpmn:dataStoreReference id="DS_ExcelZ" name="Excel: заявки" />
+    <bpmn:dataStoreReference id="DS_1C" name="1С*" />
+    <bpmn:startEvent id="S1" name="Заявка">
+      <bpmn:outgoing>SF_O2_0</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MED_S1" />
+    </bpmn:startEvent>
+    <bpmn:subProcess id="T11" name="3.5.4.1 Приём и регистрация заявки">
+      <bpmn:incoming>SF_O2_0</bpmn:incoming>
+      <bpmn:outgoing>SF_O2_1</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DA_01">
+        <bpmn:targetRef>DS_ExcelZ</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:subProcess>
+    <bpmn:subProcess id="T12" name="3.5.4.3 Проверка доступности (ATP)">
+      <bpmn:incoming>SF_O2_1</bpmn:incoming>
+      <bpmn:incoming>SF_O2_loop</bpmn:incoming>
+      <bpmn:outgoing>SF_O2_2</bpmn:outgoing>
+    </bpmn:subProcess>
+    <bpmn:subProcess id="T13" name="3.5.4.4 Утверждение графика">
+      <bpmn:incoming>SF_O2_2</bpmn:incoming>
+      <bpmn:outgoing>SF_O2_3</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DA_03">
+        <bpmn:targetRef>DS_1C</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:subProcess>
+    <bpmn:subProcess id="T14" name="3.5.4.7 Обработка изменений заказа" default="SF_O2_def">
+      <bpmn:incoming>SF_O2_3</bpmn:incoming>
+      <bpmn:outgoing>SF_O2_def</bpmn:outgoing>
+      <bpmn:outgoing>SF_O2_loop</bpmn:outgoing>
+    </bpmn:subProcess>
+    <bpmn:endEvent id="E1" name="График согласован">
+      <bpmn:incoming>SF_O2_def</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SF_O2_0" sourceRef="S1" targetRef="T11" />
+    <bpmn:sequenceFlow id="SF_O2_1" sourceRef="T11" targetRef="T12" />
+    <bpmn:sequenceFlow id="SF_O2_loop" name="возврат на этап 3" sourceRef="T14" targetRef="T12">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">корректировка клиента</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SF_O2_2" sourceRef="T12" targetRef="T13" />
+    <bpmn:sequenceFlow id="SF_O2_3" sourceRef="T13" targetRef="T14" />
+    <bpmn:sequenceFlow id="SF_O2_def" sourceRef="T14" targetRef="E1" />
+  </bpmn:process>
+  <bpmn:process id="Proc_O3" isExecutable="false">
+    <bpmn:dataStoreReference id="DS_Fcst" name="Система прогноза" />
+    <bpmn:dataStoreReference id="DS_ExcelS" name="Excel: запасы" />
+    <bpmn:dataStoreReference id="DS_SAP" name="SAP ERP" />
+    <bpmn:startEvent id="S2" name="25-е число (Т1)">
+      <bpmn:outgoing>SF_O3_0</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TED_S2">
+        <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">R/2026-01-25T09:00:00/P1M</bpmn:timeCycle>
+      </bpmn:timerEventDefinition>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="E2" name="План S&#38;OP утверждён">
+      <bpmn:incoming>SF_O3_3</bpmn:incoming>
+      <bpmn:messageEventDefinition id="MED_E2" />
+    </bpmn:endEvent>
+    <bpmn:subProcess id="T21" name="4.1.2 Прогноз спроса и расчёт ATP">
+      <bpmn:incoming>SF_O3_0</bpmn:incoming>
+      <bpmn:outgoing>SF_O3_1</bpmn:outgoing>
+      <bpmn:property id="Prop_T21" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DA_02">
+        <bpmn:sourceRef>DS_ExcelZ</bpmn:sourceRef>
+        <bpmn:targetRef>Prop_T21</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+      <bpmn:dataInputAssociation id="DA_04">
+        <bpmn:sourceRef>DS_1C</bpmn:sourceRef>
+        <bpmn:targetRef>Prop_T21</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+      <bpmn:dataOutputAssociation id="DA_05">
+        <bpmn:targetRef>DS_Fcst</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:subProcess>
+    <bpmn:subProcess id="T22" name="4.1.3 Ограниченный план материалов">
+      <bpmn:incoming>SF_O3_1</bpmn:incoming>
+      <bpmn:outgoing>SF_O3_2</bpmn:outgoing>
+      <bpmn:property id="Prop_T22" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DA_06">
+        <bpmn:sourceRef>DS_ExcelS</bpmn:sourceRef>
+        <bpmn:targetRef>Prop_T22</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+      <bpmn:dataOutputAssociation id="DA_07">
+        <bpmn:targetRef>DS_SAP</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:subProcess>
+    <bpmn:subProcess id="T23" name="4.1.4 График производства (MPS)">
+      <bpmn:incoming>SF_O3_2</bpmn:incoming>
+      <bpmn:outgoing>SF_O3_3</bpmn:outgoing>
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="SF_O3_0" sourceRef="S2" targetRef="T21" />
+    <bpmn:sequenceFlow id="SF_O3_3" sourceRef="T23" targetRef="E2" />
+    <bpmn:sequenceFlow id="SF_O3_1" sourceRef="T21" targetRef="T22" />
+    <bpmn:sequenceFlow id="SF_O3_2" sourceRef="T22" targetRef="T23" />
+  </bpmn:process>
+  <bpmn:process id="Proc_O45" isExecutable="false" />
+  <bpmn:process id="Proc_O67" isExecutable="false">
+    <bpmn:startEvent id="S3" name="План отгрузок">
+      <bpmn:outgoing>SF_O67_0</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MED_S3" />
+    </bpmn:startEvent>
+    <bpmn:subProcess id="T41" name="4.4.4.1 Резерв транспорта и маршрут">
+      <bpmn:incoming>SF_O67_0</bpmn:incoming>
+      <bpmn:outgoing>SF_O67_1</bpmn:outgoing>
+    </bpmn:subProcess>
+    <bpmn:subProcess id="T42" name="4.4.3 Погрузка и документы">
+      <bpmn:incoming>SF_O67_1</bpmn:incoming>
+      <bpmn:outgoing>SF_O67_2</bpmn:outgoing>
+    </bpmn:subProcess>
+    <bpmn:subProcess id="T43" name="4.4.4.2 Перевозка и сдача партии">
+      <bpmn:incoming>SF_O67_2</bpmn:incoming>
+      <bpmn:outgoing>SF_O67_3</bpmn:outgoing>
+    </bpmn:subProcess>
+    <bpmn:endEvent id="E4" name="Партия сдана">
+      <bpmn:incoming>SF_O67_3</bpmn:incoming>
+      <bpmn:messageEventDefinition id="MED_E4" />
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SF_O67_0" sourceRef="S3" targetRef="T41" />
+    <bpmn:sequenceFlow id="SF_O67_1" sourceRef="T41" targetRef="T42" />
+    <bpmn:sequenceFlow id="SF_O67_2" sourceRef="T42" targetRef="T43" />
+    <bpmn:sequenceFlow id="SF_O67_3" sourceRef="T43" targetRef="E4" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_1">
+    <bpmndi:BPMNPlane id="Plane_1" bpmnElement="Collab_StroyMat">
+      <bpmndi:BPMNShape id="P_Client_di" bpmnElement="P_Client" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1340" height="42" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P_O2_di" bpmnElement="P_O2" isHorizontal="true">
+        <dc:Bounds x="160" y="166" width="1340" height="140" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S1_di" bpmnElement="S1">
+        <dc:Bounds x="214" y="226" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="214" y="265" width="36" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T11_di" bpmnElement="T11" isExpanded="false">
+        <dc:Bounds x="276" y="200" width="128" height="88" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T12_di" bpmnElement="T12" isExpanded="false" bioc:stroke="#D2691E" bioc:fill="#FDF1E7" color:background-color="#FDF1E7" color:border-color="#D2691E">
+        <dc:Bounds x="440" y="200" width="128" height="88" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T13_di" bpmnElement="T13" isExpanded="false">
+        <dc:Bounds x="604" y="200" width="128" height="88" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T14_di" bpmnElement="T14" isExpanded="false" bioc:stroke="#D2691E" bioc:fill="#FDF1E7" color:background-color="#FDF1E7" color:border-color="#D2691E">
+        <dc:Bounds x="768" y="200" width="128" height="88" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="E1_di" bpmnElement="E1">
+        <dc:Bounds x="938" y="226" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="907" y="265" width="99" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SF_O2_0_di" bpmnElement="SF_O2_0">
+        <di:waypoint x="250" y="244" />
+        <di:waypoint x="276" y="244" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF_O2_1_di" bpmnElement="SF_O2_1">
+        <di:waypoint x="404" y="244" />
+        <di:waypoint x="440" y="244" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF_O2_2_di" bpmnElement="SF_O2_2">
+        <di:waypoint x="568" y="244" />
+        <di:waypoint x="604" y="244" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF_O2_3_di" bpmnElement="SF_O2_3">
+        <di:waypoint x="732" y="244" />
+        <di:waypoint x="768" y="244" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF_O2_def_di" bpmnElement="SF_O2_def">
+        <di:waypoint x="896" y="244" />
+        <di:waypoint x="938" y="244" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF_O2_loop_di" bpmnElement="SF_O2_loop" bioc:stroke="#D2691E" color:border-color="#D2691E">
+        <di:waypoint x="790" y="200" />
+        <di:waypoint x="790" y="170" />
+        <di:waypoint x="504" y="170" />
+        <di:waypoint x="504" y="200" />
+        <bpmndi:BPMNLabel color:color="#D2691E">
+          <dc:Bounds x="513" y="174" width="90" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="DS_ExcelZ_di" bpmnElement="DS_ExcelZ">
+        <dc:Bounds x="310" y="318" width="40" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="297" y="359" width="67" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DS_1C_di" bpmnElement="DS_1C">
+        <dc:Bounds x="650" y="318" width="40" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="699" y="329" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P_O3_di" bpmnElement="P_O3" isHorizontal="true">
+        <dc:Bounds x="160" y="386" width="1340" height="132" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S2_di" bpmnElement="S2">
+        <dc:Bounds x="368" y="430" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="347" y="469" width="79" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="E2_di" bpmnElement="E2">
+        <dc:Bounds x="1152" y="430" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1207" y="434" width="61" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T21_di" bpmnElement="T21" isExpanded="false" bioc:stroke="#D2691E" bioc:fill="#FDF1E7" color:background-color="#FDF1E7" color:border-color="#D2691E">
+        <dc:Bounds x="440" y="404" width="128" height="88" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T22_di" bpmnElement="T22" isExpanded="false" bioc:stroke="#D2691E" bioc:fill="#FDF1E7" color:background-color="#FDF1E7" color:border-color="#D2691E">
+        <dc:Bounds x="604" y="404" width="128" height="88" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T23_di" bpmnElement="T23" isExpanded="false" bioc:stroke="#D2691E" bioc:fill="#FDF1E7" color:background-color="#FDF1E7" color:border-color="#D2691E">
+        <dc:Bounds x="930" y="404" width="128" height="88" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SF_O3_0_di" bpmnElement="SF_O3_0">
+        <di:waypoint x="404" y="448" />
+        <di:waypoint x="440" y="448" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF_O3_1_di" bpmnElement="SF_O3_1">
+        <di:waypoint x="568" y="448" />
+        <di:waypoint x="604" y="448" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF_O3_2_di" bpmnElement="SF_O3_2">
+        <di:waypoint x="732" y="448" />
+        <di:waypoint x="930" y="448" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF_O3_3_di" bpmnElement="SF_O3_3">
+        <di:waypoint x="1058" y="448" />
+        <di:waypoint x="1152" y="448" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="DS_Fcst_di" bpmnElement="DS_Fcst">
+        <dc:Bounds x="456" y="528" width="40" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="383" y="532" width="46" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DS_ExcelS_di" bpmnElement="DS_ExcelS">
+        <dc:Bounds x="564" y="528" width="40" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="549" y="569" width="70" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P_O67_di" bpmnElement="P_O67" isHorizontal="true">
+        <dc:Bounds x="160" y="614" width="1340" height="128" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S3_di" bpmnElement="S3">
+        <dc:Bounds x="650" y="656" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="632" y="695" width="72" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T41_di" bpmnElement="T41" isExpanded="false" bioc:stroke="#D2691E" bioc:fill="#FDF1E7" color:background-color="#FDF1E7" color:border-color="#D2691E">
+        <dc:Bounds x="800" y="630" width="128" height="88" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T42_di" bpmnElement="T42" isExpanded="false">
+        <dc:Bounds x="964" y="630" width="128" height="88" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T43_di" bpmnElement="T43" isExpanded="false">
+        <dc:Bounds x="1128" y="630" width="128" height="88" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="E4_di" bpmnElement="E4">
+        <dc:Bounds x="1298" y="656" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1281" y="695" width="71" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SF_O67_0_di" bpmnElement="SF_O67_0">
+        <di:waypoint x="686" y="674" />
+        <di:waypoint x="800" y="674" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF_O67_1_di" bpmnElement="SF_O67_1">
+        <di:waypoint x="928" y="674" />
+        <di:waypoint x="964" y="674" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF_O67_2_di" bpmnElement="SF_O67_2">
+        <di:waypoint x="1092" y="674" />
+        <di:waypoint x="1128" y="674" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SF_O67_3_di" bpmnElement="SF_O67_3">
+        <di:waypoint x="1256" y="674" />
+        <di:waypoint x="1298" y="674" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="P_Supp_di" bpmnElement="P_Supp" isHorizontal="true">
+        <dc:Bounds x="160" y="800" width="1340" height="42" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DS_SAP_di" bpmnElement="DS_SAP">
+        <dc:Bounds x="720" y="546" width="40" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="770" y="557" width="48" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DA_01_di" bpmnElement="DA_01">
+        <di:waypoint x="330" y="288" />
+        <di:waypoint x="330" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DA_03_di" bpmnElement="DA_03">
+        <di:waypoint x="670" y="288" />
+        <di:waypoint x="670" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DA_02_di" bpmnElement="DA_02">
+        <di:waypoint x="350" y="336" />
+        <di:waypoint x="452" y="404" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DA_04_di" bpmnElement="DA_04">
+        <di:waypoint x="650" y="336" />
+        <di:waypoint x="568" y="416" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DA_05_di" bpmnElement="DA_05">
+        <di:waypoint x="476" y="492" />
+        <di:waypoint x="476" y="528" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DA_06_di" bpmnElement="DA_06">
+        <di:waypoint x="600" y="534" />
+        <di:waypoint x="620" y="492" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DA_07_di" bpmnElement="DA_07">
+        <di:waypoint x="707" y="492" />
+        <di:waypoint x="740" y="546" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="M01_di" bpmnElement="M01">
+        <di:waypoint x="232" y="122" />
+        <di:waypoint x="232" y="226" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="261" y="130" width="51" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="M02_di" bpmnElement="M02">
+        <di:waypoint x="650" y="200" />
+        <di:waypoint x="650" y="122" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="658" y="137" width="84" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="M03_di" bpmnElement="M03">
+        <di:waypoint x="850" y="122" />
+        <di:waypoint x="850" y="200" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="824" y="137" width="312" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="M04_di" bpmnElement="M04" bioc:stroke="#D2691E" color:border-color="#D2691E">
+        <di:waypoint x="474" y="288" />
+        <di:waypoint x="474" y="404" />
+        <bpmndi:BPMNLabel color:color="#D2691E">
+          <dc:Bounds x="379" y="312" width="87" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="M05_di" bpmnElement="M05" bioc:stroke="#D2691E" color:border-color="#D2691E">
+        <di:waypoint x="534" y="404" />
+        <di:waypoint x="534" y="288" />
+        <bpmndi:BPMNLabel color:color="#D2691E">
+          <dc:Bounds x="550" y="312" width="69" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="M07_di" bpmnElement="M07">
+        <di:waypoint x="1170" y="466" />
+        <di:waypoint x="1170" y="530" />
+        <di:waypoint x="668" y="530" />
+        <di:waypoint x="668" y="656" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="997" y="533" width="83" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="M13_di" bpmnElement="M13" bioc:stroke="#D2691E" color:border-color="#D2691E">
+        <di:waypoint x="1316" y="656" />
+        <di:waypoint x="1316" y="122" />
+        <bpmndi:BPMNLabel color:color="#D2691E">
+          <dc:Bounds x="1331" y="405" width="71" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="M10_di" bpmnElement="M10" bioc:stroke="#D2691E" color:border-color="#D2691E">
+        <di:waypoint x="926" y="448" />
+        <di:waypoint x="926" y="800" />
+        <bpmndi:BPMNLabel color:color="#D2691E">
+          <dc:Bounds x="844" y="763" width="69" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="M11_di" bpmnElement="M11">
+        <di:waypoint x="960" y="800" />
+        <di:waypoint x="960" y="492" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="972" y="756" width="82" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram>
+    <bpmndi:BPMNPlane bpmnElement="T11" />
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram>
+    <bpmndi:BPMNPlane bpmnElement="T12" />
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram>
+    <bpmndi:BPMNPlane bpmnElement="T13" />
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram>
+    <bpmndi:BPMNPlane bpmnElement="T14" />
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram>
+    <bpmndi:BPMNPlane bpmnElement="T21" />
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram>
+    <bpmndi:BPMNPlane bpmnElement="T22" />
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram>
+    <bpmndi:BPMNPlane bpmnElement="T23" />
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram>
+    <bpmndi:BPMNPlane bpmnElement="T41" />
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram>
+    <bpmndi:BPMNPlane bpmnElement="T42" />
+  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram>
+    <bpmndi:BPMNPlane bpmnElement="T43" />
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
